@@ -1,0 +1,7 @@
+Package    Version
+---------- -------
+chardet    4.0.0
+pip        21.2.4
+pypsi      1.4.5
+pyreadline 2.1
+setuptools 49.2.1
