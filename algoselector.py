@@ -44,6 +44,7 @@ class AlgoSelectorWizard(object):
         """
         self.shell = Shell()
         self.main_values = {}
+        self.gen_values = {}
         self.supervized_values = {}
         self.unsupervized_values = {}
         self.reinforced_values = {}
@@ -59,9 +60,11 @@ class AlgoSelectorWizard(object):
 
 
     ############# All the Wizards ##################################
+
+    ### GENERIC Wizards - Need for ML ##############################
     def main_wizard_l1(self):
         """
-        The Main Wizard
+        The Main Wizard L1
         """
         self.wiz_main_l1 = wiz.PromptWizard(
             name=bcolors.OKBLUE+"Do you Need ML - Data Availability"+bcolors.ENDC,
@@ -83,7 +86,7 @@ class AlgoSelectorWizard(object):
 
     def main_wizard_l2_a(self):
         """
-        The Main Wizard
+        The Main Wizard L2-A
         """
         self.wiz_main_l2_a = wiz.PromptWizard(
             name=bcolors.OKBLUE+"Do you Need ML - Data Creation"+bcolors.ENDC,
@@ -105,7 +108,7 @@ class AlgoSelectorWizard(object):
     
     def main_wizard_l2_b(self):
         """
-        The Main Wizard
+        The Main Wizard L2-B
         """
         self.wiz_main_l2_b = wiz.PromptWizard(
             name=bcolors.OKBLUE+"Do you Need ML - Data Programmability"+bcolors.ENDC,
@@ -128,7 +131,7 @@ class AlgoSelectorWizard(object):
 
     def main_wizard_l3(self):
         """
-        The Main Wizard
+        The Main Wizard L3
         """
         self.wiz_main_l3 = wiz.PromptWizard(
             name=bcolors.OKBLUE+"Do you Need ML - Data Knowledge"+bcolors.ENDC,
@@ -150,7 +153,7 @@ class AlgoSelectorWizard(object):
 
     def main_wizard_l4(self):
         """
-        The Main Wizard
+        The Main Wizard - L4
         """
         self.wiz_main_l4 = wiz.PromptWizard(
             name=bcolors.OKBLUE+"Do you Need ML - Data Pattern"+bcolors.ENDC,
@@ -169,6 +172,119 @@ class AlgoSelectorWizard(object):
                 ),
             )
         )
+    ### GENERIC Wizards - GOAL, METRICS, DATA ##############################
+    def gen_wizard(self):
+        """
+        Generic Wizard - Goal, metrics, data
+        """
+        self.wiz_generic = wiz.PromptWizard(
+            name=bcolors.OKBLUE+"Understanding Goal, Metrics and Data"+bcolors.ENDC,
+            description="",
+            steps=(
+                # The list of input prompts to ask the user.
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_goal",
+                    # Display name
+                    name=bcolors.HEADER+" What is your goal with the data? Predict, Describe or Explore"+bcolors.ENDC,
+                    # Help message
+                    help="Enter one of Predict/Describe/Explore",
+                    validators=(wiz.required_validator),
+                    default='Explore'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="metric_accuracy",
+                    # Display name
+                    name=bcolors.HEADER+" How important the metric 'Accuracy' is for you? 1-5: 1- Least important 5- Most Important"+bcolors.ENDC,
+                    # Help message
+                    help="Enter 1-5: 1 being least important, and 5 being most important",
+                    validators=(wiz.required_validator),
+                    default='1'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="metric_speed",
+                    # Display name
+                    name=bcolors.HEADER+" How important the metric 'Speed' is for you? 1-5: 1- Least important 5- Most Important"+bcolors.ENDC,
+                    # Help message
+                    help="Enter 1-5: 1 being least important, and 5 being most important",
+                    validators=(wiz.required_validator),
+                    default='1'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="metric_interpretability",
+                    # Display name
+                    name=bcolors.HEADER+" How important the metric 'Interpretability' is for you? 1-5: 1- Least important 5- Most Important"+bcolors.ENDC,
+                    # Help message
+                    help="Enter 1-5: 1 being least important, and 5 being most important",
+                    validators=(wiz.required_validator),
+                    default='1'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="metric_implementation",
+                    # Display name
+                    name=bcolors.HEADER+" How important the metric 'Ease of Implementation and Maintenance' is for you? 1-5: 1- Least important 5- Most Important"+bcolors.ENDC,
+                    # Help message
+                    help="Enter 1-5: 1 being least important, and 5 being most important",
+                    validators=(wiz.required_validator),
+                    default='1'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_generic_column",
+                    # Display name
+                    name=bcolors.HEADER+" What does the columns represent? well defined 'Features' or just 'signals' (Timeseries, pixels, etc)"+bcolors.ENDC,
+                    # Help message
+                    help="Enter one of Features or Signals",
+                    validators=(wiz.required_validator),
+                    default='Features'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_generic_nature",
+                    # Display name
+                    name=bcolors.HEADER+" Are you aware of any 'Distribution' or 'Relationships' that is inherent to the data, we can take advantage of?"+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/U",
+                    validators=(wiz.required_validator),
+                    default='Y'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_generic_features",
+                    # Display name
+                    name=bcolors.HEADER+" If features, are they well defined? i.e., are all the variables well understood? "+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/U",
+                    validators=(wiz.required_validator),
+                    default='Y'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_generic_missing",
+                    # Display name
+                    name=bcolors.HEADER+" Are there any missing values in the data? "+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/U",
+                    validators=(wiz.required_validator),
+                    default='N'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_generic_size",
+                    # Display name
+                    name=bcolors.HEADER+" How big is the data ? (Use K/M/G Bytes unit) "+bcolors.ENDC,
+                    # Help message
+                    help="Number and unit: K for Kilo, M for Mega and G for Giga. Ex: 10G for 10 Giga bytes",
+                    validators=(wiz.required_validator),
+                    default='1G'
+                ),
+            )
+        )
+
 
     def supervized_wizard(self):
         """
@@ -203,9 +319,9 @@ class AlgoSelectorWizard(object):
                 if self.main_l3_values['data_knowledge'].lower() == 'y':
                         print(bcolors.OKGREEN+"Looks like you need ML, let's continue"+bcolors.ENDC)
                 else:
-                    self.main_wizard_l3()
-                    self.main_l3_values = self.wiz_main_l3.run(self.shell)
-                    if self.main_l3_values['data_pattern'].lower() == 'y':
+                    self.main_wizard_l4()
+                    self.main_l4_values = self.wiz_main_l4.run(self.shell)
+                    if self.main_l4_values['data_pattern'].lower() == 'y':
                         print(bcolors.OKGREEN+"Looks like you need ML, let's continue"+bcolors.ENDC)
                     else:
                         print(bcolors.FAIL+"ML is not required - Please consider alternate approaches\n"+bcolors.ENDC)
@@ -216,7 +332,14 @@ class AlgoSelectorWizard(object):
                 print(bcolors.OKGREEN+"Looks like you need ML, let's continue"+bcolors.ENDC)
             else:
                 print(bcolors.FAIL+"ML is not required - Please consider alternate approaches\n"+bcolors.ENDC)
-        
+    
+    def run_generic_wizard(self):
+        """
+        Run Generic Wizard
+        """
+        self.gen_wizard()
+        self.gen_values = self.wiz_generic.run(self.shell)
+
     def run_learningtype_wizard(self):
         """
         Depending on the Main wizard values, run specific
@@ -253,7 +376,7 @@ def main():
     try:
         algowiz = AlgoSelectorWizard()
         algowiz.run_mainwiz()
-    #    algowiz.run_learningtype_wizard()
+        algowiz.run_generic_wizard()
     except(KeyboardInterrupt, MemoryError):
         print("Some Error Occured - No Suggestion can be provided")
 
