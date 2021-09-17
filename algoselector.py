@@ -178,7 +178,7 @@ class AlgoSelectorWizard(object):
         Generic Wizard - Goal, metrics, data
         """
         self.wiz_generic = wiz.PromptWizard(
-            name=bcolors.OKBLUE+"Understanding Goal, Metrics and Data"+bcolors.ENDC,
+            name=bcolors.OKBLUE+"Understanding Goal, Metrics, Data and Output Type"+bcolors.ENDC,
             description="",
             steps=(
                 # The list of input prompts to ask the user.
@@ -244,9 +244,9 @@ class AlgoSelectorWizard(object):
                 ),
                 wiz.WizardStep(
                     # ID where the value will be stored
-                    id="data_generic_nature",
+                    id="data_generic_features",
                     # Display name
-                    name=bcolors.HEADER+" Are you aware of any 'Distribution' or 'Relationships' that is inherent to the data, we can take advantage of?"+bcolors.ENDC,
+                    name=bcolors.HEADER+" If features, are they well defined? i.e., are all the variables well understood? "+bcolors.ENDC,
                     # Help message
                     help="Y/N/U",
                     validators=(wiz.required_validator),
@@ -254,9 +254,9 @@ class AlgoSelectorWizard(object):
                 ),
                 wiz.WizardStep(
                     # ID where the value will be stored
-                    id="data_generic_features",
+                    id="data_generic_nature",
                     # Display name
-                    name=bcolors.HEADER+" If features, are they well defined? i.e., are all the variables well understood? "+bcolors.ENDC,
+                    name=bcolors.HEADER+" Are you aware of any 'Distribution' or 'Relationships' that is inherent to the data, we can take advantage of?"+bcolors.ENDC,
                     # Help message
                     help="Y/N/U",
                     validators=(wiz.required_validator),
@@ -281,6 +281,16 @@ class AlgoSelectorWizard(object):
                     help="Number and unit: K for Kilo, M for Mega and G for Giga. Ex: 10G for 10 Giga bytes",
                     validators=(wiz.required_validator),
                     default='1G'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_type_output",
+                    # Display name
+                    name=bcolors.HEADER+" What is the expected output data type ? (Please type number associated with type in 'help') "+bcolors.ENDC,
+                    # Help message
+                    help=" 1:Numerical-Discrete\n 2:Numerical-Continuous\n 3:Ordinal\n 4:Categorical-Binary\n 5:Categorical-Multiclass",
+                    validators=(wiz.required_validator),
+                    default='1'
                 ),
             )
         )
