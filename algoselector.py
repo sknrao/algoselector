@@ -234,29 +234,59 @@ class AlgoSelectorWizard(object):
                 ),
                 wiz.WizardStep(
                     # ID where the value will be stored
-                    id="data_generic_column",
+                    id="data_column",
                     # Display name
-                    name=bcolors.HEADER+" What does the columns represent? well defined 'Features' or just 'signals' (Timeseries, pixels, etc)"+bcolors.ENDC,
+                    name=bcolors.HEADER+" What does the data (columns) represent? well defined 'Features', 'signals' (Timeseries, pixels, etc) or Text - (Please type the associated number)"+bcolors.ENDC,
                     # Help message
-                    help="Enter one of Features or Signals",
+                    help="1. Well Defined Features\n 2. Signals\n 3. Text - Unstructured\n 4. None of the above\n",
                     validators=(wiz.required_validator),
                     default='Features'
                 ),
                 wiz.WizardStep(
                     # ID where the value will be stored
-                    id="data_generic_features",
+                    id="data_signal_type",
+                    # Display name
+                    name=bcolors.HEADER+" If Signals, can you choose any one from the below list? "+bcolors.ENDC,
+                    # Help message
+                    help="1. Image\n 2. Audio\n 3. Timeseries\n 4. None of the above\n 5. Not Applicable\n  ",
+                    validators=(wiz.required_validator),
+                    default='3'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_text_type",
+                    # Display name
+                    name=bcolors.HEADER+" If Text, can you choose any one from the below list? "+bcolors.ENDC,
+                    # Help message
+                    help="1. Webpages\n 2. Emails\n 3. Social-Media Posts\n 4. Books\n 5. Formal Articles\n 6. Speech converted to text\n 7. None of the above\n 8. Not Applicable\n  ",
+                    validators=(wiz.required_validator),
+                    default='3'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_features",
                     # Display name
                     name=bcolors.HEADER+" If features, are they well defined? i.e., are all the variables well understood? "+bcolors.ENDC,
                     # Help message
-                    help="Y/N/U",
+                    help="Y/N/NA",
                     validators=(wiz.required_validator),
                     default='Y'
                 ),
                 wiz.WizardStep(
                     # ID where the value will be stored
-                    id="data_generic_nature",
+                    id="data_features_count",
                     # Display name
-                    name=bcolors.HEADER+" Are you aware of any 'Distribution' or 'Relationships' that is inherent to the data, we can take advantage of?"+bcolors.ENDC,
+                    name=bcolors.HEADER+" If features, How many are there? "+bcolors.ENDC,
+                    # Help message
+                    help="Number or NA",
+                    validators=(wiz.required_validator),
+                    default='10'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_distribution",
+                    # Display name
+                    name=bcolors.HEADER+" Are you aware of any 'Distribution' that is inherent to the data, we can take advantage of?"+bcolors.ENDC,
                     # Help message
                     help="Y/N/U",
                     validators=(wiz.required_validator),
@@ -264,7 +294,37 @@ class AlgoSelectorWizard(object):
                 ),
                 wiz.WizardStep(
                     # ID where the value will be stored
-                    id="data_generic_missing",
+                    id="data_io_relation",
+                    # Display name
+                    name=bcolors.HEADER+" Is the probability of 'Linear Relation' between input and the output is high?"+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/U",
+                    validators=(wiz.required_validator),
+                    default='Y'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_correlation",
+                    # Display name
+                    name=bcolors.HEADER+" Are you confident that there is NO high correlation among the independent variables in your day?"+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/U. Change in one  ",
+                    validators=(wiz.required_validator),
+                    default='Y'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_cond_indep",
+                    # Display name
+                    name=bcolors.HEADER+" Are you confident that the variables are conditionally independent?"+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/U. If probability that it rains given lightining and thunder is same as probability that it rains given lightining, then rain and thunder are conditionally independent",
+                    validators=(wiz.required_validator),
+                    default='Y'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_missing",
                     # Display name
                     name=bcolors.HEADER+" Are there any missing values in the data? "+bcolors.ENDC,
                     # Help message
@@ -274,13 +334,23 @@ class AlgoSelectorWizard(object):
                 ),
                 wiz.WizardStep(
                     # ID where the value will be stored
-                    id="data_generic_size",
+                    id="data_size_bytes",
                     # Display name
-                    name=bcolors.HEADER+" How big is the data ? (Use K/M/G Bytes unit) "+bcolors.ENDC,
+                    name=bcolors.HEADER+" How big is the data in terms of size? (Use K/M/G Bytes unit) "+bcolors.ENDC,
                     # Help message
-                    help="Number and unit: K for Kilo, M for Mega and G for Giga. Ex: 10G for 10 Giga bytes",
+                    help="Number(integer) and unit: K for Kilo, M for Mega and G for Giga. Ex: 10G for 10 Giga bytes",
                     validators=(wiz.required_validator),
                     default='1G'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_size_samples",
+                    # Display name
+                    name=bcolors.HEADER+" How big is the data in terms of samples? (Use T/M/B Samples) "+bcolors.ENDC,
+                    # Help message
+                    help="Number(integer) and unit: T for Thousand, M for Million and B for Billion. Ex: 1M for 1 Million Samples",
+                    validators=(wiz.required_validator),
+                    default='1M'
                 ),
                 wiz.WizardStep(
                     # ID where the value will be stored
@@ -291,6 +361,16 @@ class AlgoSelectorWizard(object):
                     help=" 1:Numerical-Discrete\n 2:Numerical-Continuous\n 3:Ordinal\n 4:Categorical-Binary\n 5:Categorical-Multiclass",
                     validators=(wiz.required_validator),
                     default='1'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_output_prob",
+                    # Display name
+                    name=bcolors.HEADER+" Is the expected output data a probability value ? "+bcolors.ENDC,
+                    # Help message
+                    help="Y/N",
+                    validators=(wiz.required_validator),
+                    default='N'
                 ),
             )
         )
@@ -356,10 +436,104 @@ class AlgoSelectorWizard(object):
         learning wizard
         """
 
-    def run_supwiz(self):
+    def decide_supervised(self):
         """
         Run Supervized learning Wizard.
         """
+        # Decide whether data is Low or High
+        data_size = 'unknown'
+        if ('k' in self.gen_values['data_size_bytes'].lower() or
+                't' in self.get_values['data_size_samples']):
+            data_size = 'low'
+        else:
+            data_size = 'high'
+
+        if int(self.gen_values['metric_interpretability']) >= 3 :
+            interpretability = True
+        else:
+            interpretability = False
+        
+        if int(self.gen_values['metric_speed']) >= 3 :
+            faster = True
+        else:
+            faster = False
+            
+
+        # Decide Features relative to Data (ftod_ratio) - high/low
+        if ('k' in self.gen_values['data_size_bytes'].lower() or 
+                't' in self.gen_values['data_size_samples']):
+            if int(gen_values['data_features_count']) > 50:
+                ftod_ratio = 'high'
+            else:
+                ftod_ratio = 'low'
+        elif ('m' in self.gen_values['data_size_bytes'].lower() or 
+                'm' in self.gen_values['data_size_samples']):
+            if int(gen_values['data_features_count']) > 5000:
+                ftod_ratio = 'high'
+            else:
+                ftod_ratio = 'low'
+        else:
+            if int(gen_values['data_features_count']) > 500000:
+                ftod_ratio = 'high'
+            else:
+                ftod_ratio = 'low'
+        
+        if 'high' in data_size:
+            # Cover: DT, RF, RNN, CNN, ANN and Naive Bayes
+            if interpretability:
+                if faster:
+                    print("Start with Supervised Learning - Decision Tree")
+                    return
+                else:
+                    print("Start with Supervised Learning - Random Forest")
+                    return
+            else:
+                if int(gen_values['data_column']) == 3:
+                    print("Start with Supervised Learning - RNN")
+                elif (int(gen_values['data_column']) == 2 and
+                        int(gen_values['data_signal_type']) == 1):
+                        print("Start with Supervised Learning - CNN")
+                elif (int(gen_values['data_column']) == 2 and
+                        (int(gen_values['data_signal_type']) == 2 or
+                            int(gen_values['data_signal_type']) == 3)):
+                        if 'y' in gen_values['data_output_prob'].tolower():
+                            print("Start with Supervised Learning - Naive Bayes")
+                        else:
+                            print("Start with Supervised Learning - ANN")
+                else:
+                    print("Start with Supervised Learning - ANN")
+        else:
+            from_b = False
+            # Cover: Regressions
+            if 'low' in ftod_ratio:
+                print("Start with Supervised Learning - SVN with Gaussian Kernel")
+            else:
+                from_b = True
+
+
+            if int(gen_values['data_output_type']) == 2:
+                if 'y' in get_values['data_io_relation'].tolower():
+                    print("Start with Supervised Learning - Linear Regression or Linear SVM")
+                else:
+                    print("Start with Supervised Learning - Polynomial Regression or nonLinear SVM")
+            else:
+                from_b = True
+            if from_b:
+                if int(gen_values['data_output_type']) == 4:
+                    if 'y' in gen_values['data_output_prob'].tolower():
+                        if 'y' in gen_value['data_cond_indep'].tolower():
+                            print("Start with Supervised Learning - Naive Bayes")
+                        else:
+                            if 'y' in gen_value['data_correlation'].tolower():
+                                print("Start with Supervised Learning - LASSO or Ridge Regression")
+                            else:
+                                print("Start with Supervised Learning - Logistic Regression")
+                    else:
+                        print("Start with Supervised Learning - Polynomial Regression or nonLinear SVM")
+
+                else:
+                    print("Start with Supervised Learning - KNN")
+
 
     def run_unsupwiz(self):
         """
