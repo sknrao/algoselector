@@ -390,6 +390,75 @@ class AlgoSelectorWizard(object):
         """
         The Reinforced Learning Wizard
         """
+        message = """
+            Reward  |--------|
+            |-------| Agent  |  Action
+            | |-----|        |-------|
+            | |	    |--------|       |
+            | |state                 |
+            | |	                     |
+            | |	   |-----------|     |
+            | |----|Environment|     |
+            |------|           |-----|
+    	           |-----------|
+            """
+        self.wiz_reinforced = wiz.PromptWizard(
+            name=bcolors.OKBLUE+"Reinforcement Specific"+bcolors.ENDC,
+            description="",
+            steps=(
+                # The list of input prompts to ask the user.
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="ri_info",
+                    # Display name
+                    name=bcolors.HEADER+" Type help for reference diagram for reinforcement-learning"+bcolors.ENDC,
+                    # Help message
+                    help=message,
+                    validators=(wiz.required_validator),
+                    default='Type Help or Press Enter'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="ri_model_preference",
+                    # Display name
+                    name=bcolors.HEADER+" Do you prefer model-based approach? (Type NA if you are not sure) "+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/NA",
+                    validators=(wiz.required_validator),
+                    default='Y'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="ri_model_availability",
+                    # Display name
+                    name=bcolors.HEADER+" Do you have a model for model-based approach? (Type NA if not applicable) "+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/NA",
+                    validators=(wiz.required_validator),
+                    default='Y'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="ri_modelfree_value",
+                    # Display name
+                    name=bcolors.HEADER+" In Model-Free approach, do you prefer value-based approach? (Type NA if not applicable) "+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/NA",
+                    validators=(wiz.required_validator),
+                    default='Y'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="ri_modelfree_value_state",
+                    # Display name
+                    name=bcolors.HEADER+" In Model-Free Value-Based approach, do you prefer state-only model? (Type NA if not applicable) "+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/NA",
+                    validators=(wiz.required_validator),
+                    default='Y'
+                ),
+            )
+        )
 
     ############### All the Run Operations ######################
     def run_mainwiz(self):
@@ -435,10 +504,47 @@ class AlgoSelectorWizard(object):
         Depending on the Main wizard values, run specific
         learning wizard
         """
+    
+    def run_unsupwiz(self):
+        """
+        Run UnSupervized Learning Wizard.
+        """
+    
+    def run_reinforced_wizard(self):
+        """
+        Run Reinforced Learning Wizard
+        """
+        self.reinforced_wizard()
+        self.ri_values = self.wiz_reinforced.run(self.shell)
+
+
+    def decide_reinforced(self):
+        """
+        Decide which reinforement learning to use.
+        """
+        if int(self.gen_values['data_type_output']) == 2:
+            if ('y' in ri_values['ri_model_preference'].tolower():
+                    'y' in ri_values['ri_model_availability'].tolower()):
+                print("Start with Reinforcement Learning - AlphaZero")
+            else:
+                print("Reinforcement Learning models to consider - World Models, I2A, MBMF, and MBVE")
+        else:
+            if 'y' in ri_values['ri_model_preference'].tolower():
+                print("Reinforcement Learning models to consider - World Models, I2A, MBMF, and MBVE")
+            else:
+                # Model-Free based approach.
+                if 'y' not in ri_values['ri_modelfree_value'].tolower():
+                    print("Reinforcement Learning models to consider: Policy Gradient and Actor Critic")
+                else:
+                    if 'y' in ri_value['ri_modelfree_value_state'].tolower():
+                        print("Reinforcement Learning models to consider - Monte Carlo, TD(0), and TD(Lambda)")
+                    else:
+                        print("Reinforcement Learning models to consider - SARSA, QLearning, Deep Queue Nets")
+
 
     def decide_supervised(self):
         """
-        Run Supervized learning Wizard.
+        Decide which Supervized learning to use.
         """
         # Decide whether data is Low or High
         data_size = 'unknown'
@@ -473,7 +579,7 @@ class AlgoSelectorWizard(object):
             else:
                 ftod_ratio = 'low'
         else:
-            if int(gen_values['data_features_count']) > 500000:
+            if int(self.gen_values['data_features_count']) > 500000:
                 ftod_ratio = 'high'
             else:
                 ftod_ratio = 'low'
@@ -488,14 +594,14 @@ class AlgoSelectorWizard(object):
                     print("Start with Supervised Learning - Random Forest")
                     return
             else:
-                if int(gen_values['data_column']) == 3:
+                if int(self.gen_values['data_column']) == 3:
                     print("Start with Supervised Learning - RNN")
-                elif (int(gen_values['data_column']) == 2 and
-                        int(gen_values['data_signal_type']) == 1):
+                elif (int(self.gen_values['data_column']) == 2 and
+                        int(self.gen_values['data_signal_type']) == 1):
                         print("Start with Supervised Learning - CNN")
-                elif (int(gen_values['data_column']) == 2 and
-                        (int(gen_values['data_signal_type']) == 2 or
-                            int(gen_values['data_signal_type']) == 3)):
+                elif (int(self.gen_values['data_column']) == 2 and
+                        (int(self.gen_values['data_signal_type']) == 2 or
+                            int(self.gen_values['data_signal_type']) == 3)):
                         if 'y' in gen_values['data_output_prob'].tolower():
                             print("Start with Supervised Learning - Naive Bayes")
                         else:
@@ -511,20 +617,20 @@ class AlgoSelectorWizard(object):
                 from_b = True
 
 
-            if int(gen_values['data_output_type']) == 2:
-                if 'y' in get_values['data_io_relation'].tolower():
+            if int(self.gen_values['data_type_output']) == 2:
+                if 'y' in self.gen_values['data_io_relation'].tolower():
                     print("Start with Supervised Learning - Linear Regression or Linear SVM")
                 else:
                     print("Start with Supervised Learning - Polynomial Regression or nonLinear SVM")
             else:
                 from_b = True
             if from_b:
-                if int(gen_values['data_output_type']) == 4:
-                    if 'y' in gen_values['data_output_prob'].tolower():
-                        if 'y' in gen_value['data_cond_indep'].tolower():
+                if int(self.gen_values['data_output_type']) == 4:
+                    if 'y' in self.gen_values['data_output_prob'].tolower():
+                        if 'y' in self.gen_values['data_cond_indep'].tolower():
                             print("Start with Supervised Learning - Naive Bayes")
                         else:
-                            if 'y' in gen_value['data_correlation'].tolower():
+                            if 'y' in self.gen_values['data_correlation'].tolower():
                                 print("Start with Supervised Learning - LASSO or Ridge Regression")
                             else:
                                 print("Start with Supervised Learning - Logistic Regression")
@@ -535,15 +641,7 @@ class AlgoSelectorWizard(object):
                     print("Start with Supervised Learning - KNN")
 
 
-    def run_unsupwiz(self):
-        """
-        Run UnSupervized Learning Wizard.
-        """
 
-    def run_reinforcedwiz(self):
-        """
-        Run Reinforced Learning Wizard
-        """
 
 def signal_handler(signum, frame):
     """
@@ -559,8 +657,9 @@ def main():
     """
     try:
         algowiz = AlgoSelectorWizard()
-        algowiz.run_mainwiz()
-        algowiz.run_generic_wizard()
+#        algowiz.run_mainwiz()
+#        algowiz.run_generic_wizard()
+        algowiz.run_reinforced_wizard()
     except(KeyboardInterrupt, MemoryError):
         print("Some Error Occured - No Suggestion can be provided")
 
@@ -569,4 +668,17 @@ def main():
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
+    message = """
+        Reward  |--------|
+        |-------| Agent  |  Action
+        | |-----|        |-------|
+        | |     |--------|       |
+        | |                      |
+        | |state                 |
+        | |                      |
+        | |    |-----------|     |
+        | |----|Environment|     |
+        |------|           |-----|
+               |-----------|
+        """
     main()
