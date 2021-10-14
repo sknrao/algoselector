@@ -385,6 +385,64 @@ class AlgoSelectorWizard(object):
         """
         The Un-Supervized Learning Wizard
         """
+        self.wiz_generic = wiz.PromptWizard(
+            name=bcolors.OKBLUE+"Understanding Goal, Metrics, Data and Output Type"+bcolors.ENDC,
+            description="",
+            steps=(
+                # The list of input prompts to ask the user.
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="unsup_goal",
+                    # Display name
+                    name=bcolors.HEADER+" What is the main goal? (Please type number associated with type in 'help')"+bcolors.ENDC,
+                    # Help message
+                    help="1: Explore Similar Groups (clustering) \n 2: Perform Dimensionality Reduction\n 3: Others\n",
+                    validators=(wiz.required_validator),
+                    default='1'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="unsup_dr_topic_mod",
+                    # Display name
+                    name=bcolors.HEADER+" If dimensionality reduction, do you prefer topic modelling ? (Please type NA is you are not sure)"+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/NA",
+                    validators=(wiz.required_validator),
+                    default='NA'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="unsup_clus_dv",
+                    # Display name
+                    name=bcolors.HEADER+" Are you aware of density variations in your data ? (Please type NA is you are not sure)"+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/NA",
+                    validators=(wiz.required_validator),
+                    default='NA'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="unsup_clus_outliers",
+                    # Display name
+                    name=bcolors.HEADER+" Are there too many outliers in your data ? (Please type NA is you are not sure)"+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/NA",
+                    validators=(wiz.required_validator),
+                    default='NA'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="unsup_clus_groups",
+                    # Display name
+                    name=bcolors.HEADER+" If clustering, do you know how many groups to form? (Please type NA is you are not sure)"+bcolors.ENDC,
+                    # Help message
+                    help="Y/N/NA",
+                    validators=(wiz.required_validator),
+                    default='NA'
+                ),
+
+            )
+        )
 
     def reinforced_wizard(self):
         """
@@ -457,6 +515,16 @@ class AlgoSelectorWizard(object):
                     validators=(wiz.required_validator),
                     default='Y'
                 ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="ri_app_domain",
+                    # Display name
+                    name=bcolors.HEADER+" What is the application domain ? (Please type number associated with type in 'help') "+bcolors.ENDC,
+                    # Help message
+                    help=" 1:Computer Resource Mgmt.\n 2:Robotics\n 3:Traffic-Control\n 4:Reccommenders\n 5:Autonomous Vehicles\n 6:Games\n 7:Chemistry\n 8:Others\m",
+                    validators=(wiz.required_validator),
+                    default='1'
+                ),
             )
         )
 
@@ -505,10 +573,13 @@ class AlgoSelectorWizard(object):
         learning wizard
         """
     
-    def run_unsupwiz(self):
+    def run_unsupervised_wizard(self):
         """
         Run UnSupervized Learning Wizard.
         """
+        self.unsupervised_wizard()
+        self.unsup_values = self.wiz_unsupervised.run(self.shell)
+
     
     def run_reinforced_wizard(self):
         """
@@ -516,6 +587,11 @@ class AlgoSelectorWizard(object):
         """
         self.reinforced_wizard()
         self.ri_values = self.wiz_reinforced.run(self.shell)
+
+    def decide_unsupervised(self):
+        """
+        Decide which Unsupervised-learning to use
+        """
 
 
     def decide_reinforced(self):
