@@ -1,4 +1,5 @@
 # Copyright 2021 Spirent Communications.
+# sridhar.rao@spirent.com
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +18,14 @@ Tool to suggest which ML approach is more applicable for
 a particular data and usecase.
 """
 
+"""
+TODO: 
+1. Minimize code.
+a. Reduce returns.
+b. Optimize loops.
+
+2. Add Informative data to the user.
+"""
 
 from __future__ import print_function
 import signal
@@ -47,7 +56,7 @@ class AlgoSelectorWizard(object):
         self.gen_values = {}
         self.supervized_values = {}
         self.unsupervized_values = {}
-        self.reinforced_values = {}
+        self.reinforcement_values = {}
         self.wiz_main = None
         self.wiz_main_l1 = None
         self.wiz_main_l2_a = None
@@ -56,7 +65,16 @@ class AlgoSelectorWizard(object):
         self.wiz_main_l4 = None
         self.wiz_supervized = None
         self.wiz_unsupervized = None
-        self.wiz_reinforced = None
+        self.wiz_reinforcement = None
+        self.ml_needed = False
+        self.supervised = False
+        self.unsupervised = False
+        self.reinforcement = False
+        self.data_size = 'high'
+        self.interpretability = False
+        self.faster = False
+        self.ftod_ratio = 'low'
+        self.repro = False
 
 
     ############# All the Wizards ##################################
@@ -110,11 +128,22 @@ class AlgoSelectorWizard(object):
         """
         The Main Wizard L2-B
         """
+        label = """ One or more meaningful and informative 'tag' to provide context so that a machine learning model can learn from it. For example, labels might indicate whether a photo contains a bird or car, which words were uttered in an audio recording, or if an x-ray contains a tumor. Data labeling is required for a variety of use cases including computer vision, natural language processing, and speech recognition."""
         self.wiz_main_l2_b = wiz.PromptWizard(
             name=bcolors.OKBLUE+"Do you Need ML - Data Programmability"+bcolors.ENDC,
             description="",
             steps=(
                 # The list of input prompts to ask the user.
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="data_label",
+                    # Display name
+                    name=bcolors.HEADER+" Do you have Labelled data? (Type Y/N/U - Yes/No/Unknown). Type help for description of label. "+bcolors.ENDC,
+                    # Help message
+                    help=label,
+                    validators=(wiz.required_validator),
+                    default='Y',
+                ),
                 wiz.WizardStep(
                     # ID where the value will be stored
                     id="data_programmability",
@@ -217,6 +246,16 @@ class AlgoSelectorWizard(object):
                     id="metric_interpretability",
                     # Display name
                     name=bcolors.HEADER+" How important the metric 'Interpretability' is for you? 1-5: 1- Least important 5- Most Important"+bcolors.ENDC,
+                    # Help message
+                    help="Enter 1-5: 1 being least important, and 5 being most important",
+                    validators=(wiz.required_validator),
+                    default='1'
+                ),
+                wiz.WizardStep(
+                    # ID where the value will be stored
+                    id="metric_reproducibility",
+                    # Display name
+                    name=bcolors.HEADER+" How important the metric 'Reproducibility' is for you? 1-5: 1- Least important 5- Most Important"+bcolors.ENDC,
                     # Help message
                     help="Enter 1-5: 1 being least important, and 5 being most important",
                     validators=(wiz.required_validator),
@@ -444,7 +483,7 @@ class AlgoSelectorWizard(object):
             )
         )
 
-    def reinforced_wizard(self):
+    def reinforcement_wizard(self):
         """
         The Reinforced Learning Wizard
         """
@@ -460,7 +499,7 @@ class AlgoSelectorWizard(object):
             |------|           |-----|
     	           |-----------|
             """
-        self.wiz_reinforced = wiz.PromptWizard(
+        self.wiz_reinforcement = wiz.PromptWizard(
             name=bcolors.OKBLUE+"Reinforcement Specific"+bcolors.ENDC,
             description="",
             steps=(
@@ -538,6 +577,10 @@ class AlgoSelectorWizard(object):
         if self.main_l1_values['data_availability'].lower() == 'y':
             self.main_wizard_l2_b()
             self.main_l2b_values = self.wiz_main_l2_b.run(self.shell)
+            if self.main_l2b_values['data_labe'].lower() == 'y':
+                self.supervised = True
+            else
+                self.unsupervised = True
             if self.main_l2b_values['data_programmability'].lower() == 'y':
                 print(bcolors.FAIL+"ML is not required - Please consider alternate approaches\n"+bcolors.ENDC)
             else:
@@ -545,11 +588,13 @@ class AlgoSelectorWizard(object):
                 self.main_l3_values = self.wiz_main_l3.run(self.shell)
                 if self.main_l3_values['data_knowledge'].lower() == 'y':
                         print(bcolors.OKGREEN+"Looks like you need ML, let's continue"+bcolors.ENDC)
+                        self.ml_needed = True
                 else:
                     self.main_wizard_l4()
                     self.main_l4_values = self.wiz_main_l4.run(self.shell)
                     if self.main_l4_values['data_pattern'].lower() == 'y':
                         print(bcolors.OKGREEN+"Looks like you need ML, let's continue"+bcolors.ENDC)
+                        self.ml_needed = True
                     else:
                         print(bcolors.FAIL+"ML is not required - Please consider alternate approaches\n"+bcolors.ENDC)
         else:
@@ -557,6 +602,8 @@ class AlgoSelectorWizard(object):
             self.main_l2a_values = self.wiz_main_l2_a.run(self.shell)
             if self.main_l2a_values['data_creativity'].lower() == 'y':
                 print(bcolors.OKGREEN+"Looks like you need ML, let's continue"+bcolors.ENDC)
+                self.ml_needed = True
+                self.reinforcement = True
             else:
                 print(bcolors.FAIL+"ML is not required - Please consider alternate approaches\n"+bcolors.ENDC)
     
@@ -567,12 +614,6 @@ class AlgoSelectorWizard(object):
         self.gen_wizard()
         self.gen_values = self.wiz_generic.run(self.shell)
 
-    def run_learningtype_wizard(self):
-        """
-        Depending on the Main wizard values, run specific
-        learning wizard
-        """
-    
     def run_unsupervised_wizard(self):
         """
         Run UnSupervized Learning Wizard.
@@ -580,90 +621,137 @@ class AlgoSelectorWizard(object):
         self.unsupervised_wizard()
         self.unsup_values = self.wiz_unsupervised.run(self.shell)
 
-    
-    def run_reinforced_wizard(self):
+    def run_reinforcement_wizard(self):
         """
         Run Reinforced Learning Wizard
         """
-        self.reinforced_wizard()
-        self.ri_values = self.wiz_reinforced.run(self.shell)
+        self.reinforcement_wizard()
+        self.ri_values = self.wiz_reinforcement.run(self.shell)
 
     def decide_unsupervised(self):
         """
         Decide which Unsupervised-learning to use
         """
+        repro = False
+        clus_prob = False
+        if int(self.unsup_values['unsup_goal']) == 1:
+            # Clustering
+            if 'high' in self.data_size:
+                if not self.reproducibility:
+                    clus_prob = True
+                else:
+                    repro = True
+            else:
+                if 'y' in self.unsup_values['unsup_clus_dv'].tolower():
+                    if 'y' in self.unsup_value['unsup_clus_groups'].tolower():
+                        clus_prob = True
+                    else:
+                        print("Unsupervised Learning model to consider: Hierarchical Clustering")
+                        return
+                else:
+                    repro = True
+            if repro:
+                if 'y' in self.unsup_value['unsup_clus_outliers'].tolower():
+                    print("Unsupervised Learning model to consider: Hierarchical Clustering")
+                    return
+                else:
+                    print("Unsupervised Learning model to consider: DBSCAN")
+                    return
+            if clus_prob:
+                if 'y' in self.gen_values['data_output_prob'].tolower():
+                    print("Unsupervised Learning model to consider: Gaussian Mixture")
+                    return
+                else:
+                    print("Unsupervised Learning model to consider: KMeans")
+                    return
+        elif int(self.unsup_values['unsup_goal']) == 2:
+            # Dimensionality Reduction
+            if 'y' in self.unsup_value['unsup_dr_topic_mod'].tolower():
+                if 'y' in self.gen_values['data_output_prob'].tolower():
+                    print("Unsupervised Learning model to consider: SVD")
+                    return
+                else:
+                    print("Unsupervised Learning model to consider: LDA")
+                    return
+            else:
+                print("Unsupervised Learning model to consider: PCA")
+                return
+        else:
+            print("Sorry. We need to discuss, please connect with Anuket Thoth Project <sridhar.rao@spirent.com>"). 
+        
 
-
-    def decide_reinforced(self):
+    def decide_reinforcement(self):
         """
         Decide which reinforement learning to use.
         """
         if int(self.gen_values['data_type_output']) == 2:
             if ('y' in ri_values['ri_model_preference'].tolower():
                     'y' in ri_values['ri_model_availability'].tolower()):
-                print("Start with Reinforcement Learning - AlphaZero")
+                print("Reinforcement Learning model to consider - AlphaZero")
+                return
             else:
                 print("Reinforcement Learning models to consider - World Models, I2A, MBMF, and MBVE")
+                return
         else:
             if 'y' in ri_values['ri_model_preference'].tolower():
                 print("Reinforcement Learning models to consider - World Models, I2A, MBMF, and MBVE")
+                return
             else:
                 # Model-Free based approach.
                 if 'y' not in ri_values['ri_modelfree_value'].tolower():
                     print("Reinforcement Learning models to consider: Policy Gradient and Actor Critic")
+                    return
                 else:
                     if 'y' in ri_value['ri_modelfree_value_state'].tolower():
                         print("Reinforcement Learning models to consider - Monte Carlo, TD(0), and TD(Lambda)")
+                        return
                     else:
                         print("Reinforcement Learning models to consider - SARSA, QLearning, Deep Queue Nets")
+                        return
+        # Default
+        print("Sorry. We need to discuss, please connect with Anuket Thoth Project <sridhar.rao@spirent.com>"). 
+
+    def perform_inference(self):
+        """
+        Perform Inferences. Used across all 3 types.
+        """
+        # Decide whether data is Low or High
+        self.data_size = 'unknown'
+        if ('k' in self.gen_values['data_size_bytes'].lower() or
+                't' in self.get_values['data_size_samples']):
+            self.data_size = 'low'
+
+        if int(self.gen_values['metric_interpretability']) >= 3 :
+            self.interpretability = True
+        
+        if int(self.gen_values['metric_speed']) >= 3 :
+            self.faster = True
+
+        if int(self.gen_values['metric_reproducibility']) >= 3 :
+            self.repro = True
+            
+        # Decide Features relative to Data (ftod_ratio) - high/low
+        if ('k' in self.gen_values['data_size_bytes'].lower() or 
+                't' in self.gen_values['data_size_samples']):
+            if int(gen_values['data_features_count']) > 50:
+                self.ftod_ratio = 'high'
+        elif ('m' in self.gen_values['data_size_bytes'].lower() or 
+                'm' in self.gen_values['data_size_samples']):
+            if int(gen_values['data_features_count']) > 5000:
+                self.ftod_ratio = 'high'
+        else:
+            if int(self.gen_values['data_features_count']) > 500000:
+                self.ftod_ratio = 'high'
 
 
     def decide_supervised(self):
         """
         Decide which Supervized learning to use.
-        """
-        # Decide whether data is Low or High
-        data_size = 'unknown'
-        if ('k' in self.gen_values['data_size_bytes'].lower() or
-                't' in self.get_values['data_size_samples']):
-            data_size = 'low'
-        else:
-            data_size = 'high'
-
-        if int(self.gen_values['metric_interpretability']) >= 3 :
-            interpretability = True
-        else:
-            interpretability = False
-        
-        if int(self.gen_values['metric_speed']) >= 3 :
-            faster = True
-        else:
-            faster = False
-            
-
-        # Decide Features relative to Data (ftod_ratio) - high/low
-        if ('k' in self.gen_values['data_size_bytes'].lower() or 
-                't' in self.gen_values['data_size_samples']):
-            if int(gen_values['data_features_count']) > 50:
-                ftod_ratio = 'high'
-            else:
-                ftod_ratio = 'low'
-        elif ('m' in self.gen_values['data_size_bytes'].lower() or 
-                'm' in self.gen_values['data_size_samples']):
-            if int(gen_values['data_features_count']) > 5000:
-                ftod_ratio = 'high'
-            else:
-                ftod_ratio = 'low'
-        else:
-            if int(self.gen_values['data_features_count']) > 500000:
-                ftod_ratio = 'high'
-            else:
-                ftod_ratio = 'low'
-        
-        if 'high' in data_size:
+        """      
+        if 'high' in self.data_size:
             # Cover: DT, RF, RNN, CNN, ANN and Naive Bayes
-            if interpretability:
-                if faster:
+            if self.interpretability:
+                if self.faster:
                     print("Start with Supervised Learning - Decision Tree")
                     return
                 else:
@@ -672,23 +760,29 @@ class AlgoSelectorWizard(object):
             else:
                 if int(self.gen_values['data_column']) == 3:
                     print("Start with Supervised Learning - RNN")
+                    return
                 elif (int(self.gen_values['data_column']) == 2 and
                         int(self.gen_values['data_signal_type']) == 1):
-                        print("Start with Supervised Learning - CNN")
+                        print("Start with Supervised Learning - CNN")\
+                        return
                 elif (int(self.gen_values['data_column']) == 2 and
                         (int(self.gen_values['data_signal_type']) == 2 or
                             int(self.gen_values['data_signal_type']) == 3)):
                         if 'y' in gen_values['data_output_prob'].tolower():
                             print("Start with Supervised Learning - Naive Bayes")
+                            return
                         else:
                             print("Start with Supervised Learning - ANN")
+                            return
                 else:
                     print("Start with Supervised Learning - ANN")
+                    return
         else:
             from_b = False
             # Cover: Regressions
-            if 'low' in ftod_ratio:
+            if 'low' in self.ftod_ratio:
                 print("Start with Supervised Learning - SVN with Gaussian Kernel")
+                return
             else:
                 from_b = True
 
@@ -696,8 +790,10 @@ class AlgoSelectorWizard(object):
             if int(self.gen_values['data_type_output']) == 2:
                 if 'y' in self.gen_values['data_io_relation'].tolower():
                     print("Start with Supervised Learning - Linear Regression or Linear SVM")
+                    return
                 else:
                     print("Start with Supervised Learning - Polynomial Regression or nonLinear SVM")
+                    return
             else:
                 from_b = True
             if from_b:
@@ -705,18 +801,39 @@ class AlgoSelectorWizard(object):
                     if 'y' in self.gen_values['data_output_prob'].tolower():
                         if 'y' in self.gen_values['data_cond_indep'].tolower():
                             print("Start with Supervised Learning - Naive Bayes")
+                            return
                         else:
                             if 'y' in self.gen_values['data_correlation'].tolower():
                                 print("Start with Supervised Learning - LASSO or Ridge Regression")
+                                return
                             else:
                                 print("Start with Supervised Learning - Logistic Regression")
+                                return
                     else:
                         print("Start with Supervised Learning - Polynomial Regression or nonLinear SVM")
+                        return
 
                 else:
                     print("Start with Supervised Learning - KNN")
+                    return
+        # Default
+        print("Sorry. We need to discuss, please connect with Anuket Thoth Project <sridhar.rao@spirent.com>"). 
 
-
+    def ask_and_decide(self):
+        """
+        THe Main Engine
+        """
+        self.run_mainwiz()
+        if self.ml_needed:
+            self.algowiz.run_generic_wizard()
+            if self.supervised:
+                self.decide_supervised()
+            elif self.unsupervised:
+                self.run_unsupervised_wizard()
+                self.decide_unsupervised()
+            elif self.reinforcement:
+                self.run_reinforcement_wizard()
+                self.decide_reinforcement()
 
 
 def signal_handler(signum, frame):
@@ -733,9 +850,7 @@ def main():
     """
     try:
         algowiz = AlgoSelectorWizard()
-#        algowiz.run_mainwiz()
-#        algowiz.run_generic_wizard()
-        algowiz.run_reinforced_wizard()
+        algowiz.ask_and_decide()
     except(KeyboardInterrupt, MemoryError):
         print("Some Error Occured - No Suggestion can be provided")
 
@@ -744,17 +859,4 @@ def main():
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
-    message = """
-        Reward  |--------|
-        |-------| Agent  |  Action
-        | |-----|        |-------|
-        | |     |--------|       |
-        | |                      |
-        | |state                 |
-        | |                      |
-        | |    |-----------|     |
-        | |----|Environment|     |
-        |------|           |-----|
-               |-----------|
-        """
     main()
